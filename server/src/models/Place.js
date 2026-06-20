@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+
+import mongoose from "mongoose";
 
 const placeSchema = new mongoose.Schema({
   placeId: { type: String, required: true, unique: true, index: true },
@@ -25,4 +26,6 @@ const placeSchema = new mongoose.Schema({
 placeSchema.index({ lat: 1, lng: 1 });
 placeSchema.index({ searchKeyword: 1, searchLocation: 1 });
 
-module.exports = mongoose.model('Place', placeSchema);
+const place = mongoose.model('Place', placeSchema);
+
+export default place;

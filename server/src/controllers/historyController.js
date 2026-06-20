@@ -1,5 +1,5 @@
-const SearchHistory = require('../models/SearchHistory');
-const asyncHandler = require('../utils/asyncHandler');
+import SearchHistory from '../models/SearchHistory.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 const getHistory = asyncHandler(async (req, res) => {
   const limit = Math.min(Number(req.query.limit || 25), 100);

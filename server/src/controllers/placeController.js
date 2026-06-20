@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const Place = require('../models/Place');
 const SearchHistory = require('../models/SearchHistory');
 const asyncHandler = require('../utils/asyncHandler');
-const { isFuzzyDuplicate } = require('../services/deduplication');
-const { searchGooglePlaces } = require('../services/googlePlaces');
-const { validateAndCleanPlace } = require('../services/validation');
+const { isFuzzyDuplicate } = require('./services/deduplication');
+const { searchGooglePlaces } = require('./services/googlePlaces');
+const { validateAndCleanPlace } = require('./services/validation');
 
 function parsePositiveNumber(value, fallback) {
   const parsed = Number(value);
@@ -196,7 +196,7 @@ const getSearchStatus = asyncHandler(async (req, res) => {
   res.json({ success: true, data: history });
 });
 
-module.exports = {
+export {
   deletePlace,
   getPlaceById,
   getPlaces,

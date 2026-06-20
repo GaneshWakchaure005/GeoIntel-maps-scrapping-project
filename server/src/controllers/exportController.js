@@ -1,5 +1,5 @@
-const Place = require('../models/Place');
-const asyncHandler = require('../utils/asyncHandler');
+import Place from '../models/Place.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 function buildExportQuery(query) {
   const filters = {};
