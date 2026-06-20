@@ -1,11 +1,12 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend API for the geo intelligence platform",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node -e \"require('./app'); console.log('server app loaded')\""
   },
   "keywords": [],
   "author": "",
