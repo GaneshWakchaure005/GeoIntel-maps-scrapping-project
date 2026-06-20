@@ -1,12 +1,17 @@
 import Place from "../models/Place.js";
+import SearchResult from "../models/SearchResult.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { Parser } from "json2csv";
 import xlsx from "xlsx";
 
-function buildExportQuery(query, userId) {
+async function buildExportQuery(query, userId) {
   const filters = { user: userId };
 
-  if (query.ids) {
+  if (query.historyId) {
+    const searchResults = await SearchResult.find({ user: userId, searchHistory: query.historyId });
+    const placeIds = searchResults.map((r) => r.place);
+    filters._id = { $in: placeIds };
+  } else if (query.ids) {
     filters._id = { $in: String(query.ids).split(",").map((id) => id.trim()).filter(Boolean) };
   }
 
@@ -45,7 +50,8 @@ function toRows(places) {
 }
 
 export const exportCsv = asyncHandler(async (req, res) => {
-  const places = await Place.find(buildExportQuery(req.query, req.user._id)).sort({ createdAt: -1 });
+  const queryFilters = await buildExportQuery(req.query, req.user._id);
+  const places = await Place.find(queryFilters).sort({ createdAt: -1 });
   const parser = new Parser();
   const csv = parser.parse(toRows(places));
 
@@ -55,7 +61,8 @@ export const exportCsv = asyncHandler(async (req, res) => {
 });
 
 export const exportExcel = asyncHandler(async (req, res) => {
-  const places = await Place.find(buildExportQuery(req.query, req.user._id)).sort({ createdAt: -1 });
+  const queryFilters = await buildExportQuery(req.query, req.user._id);
+  const places = await Place.find(queryFilters).sort({ createdAt: -1 });
   const worksheet = xlsx.utils.json_to_sheet(toRows(places));
   const workbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workbook, worksheet, "Places");

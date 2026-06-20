@@ -52,7 +52,9 @@ async function textSearchPage({ keyword, location, radius, pageToken }) {
     params.pagetoken = pageToken;
   } else {
     params.query = `${keyword} in ${location}`;
-    params.radius = radius;
+    if (radius) {
+      params.radius = radius;
+    }
   }
 
   const response = await axios.get(TEXT_SEARCH_URL, { params, timeout: 15000 });
@@ -75,7 +77,7 @@ async function getPlaceDetails(placeId) {
   return response.data.result || null;
 }
 
-export async function searchGooglePlaces({ keyword, location, radius = 10000, maxResults }) {
+export async function searchGooglePlaces({ keyword, location, radius, maxResults }) {
   const maxPages = Number(process.env.GOOGLE_TEXT_SEARCH_MAX_PAGES || 3);
   const resultLimit = Math.min(Number(maxResults || process.env.GOOGLE_MAX_RESULTS || 40), 60);
   const textResults = [];
@@ -83,17 +85,54 @@ export async function searchGooglePlaces({ keyword, location, radius = 10000, ma
   let apiCalls = 0;
 
   for (let page = 0; page < maxPages && textResults.length < resultLimit; page += 1) {
-    if (nextPageToken) {
-      await sleep(2100);
-    }
+    let pageData = null;
 
-    const pageData = await textSearchPage({
-      keyword,
-      location,
-      radius,
-      pageToken: nextPageToken,
-    });
-    apiCalls += 1;
+    if (page === 0) {
+      // First page is required, if it fails, throw
+      pageData = await textSearchPage({
+        keyword,
+        location,
+        radius,
+        pageToken: nextPageToken,
+      });
+      apiCalls += 1;
+    } else {
+      // Subsequent pages: try with retry logic and graceful fallback
+      if (nextPageToken) {
+        await sleep(2100);
+      }
+
+      let attempts = 3;
+      let success = false;
+
+      while (attempts > 0 && !success) {
+        try {
+          pageData = await textSearchPage({
+            keyword,
+            location,
+            radius,
+            pageToken: nextPageToken,
+          });
+          apiCalls += 1;
+          success = true;
+        } catch (error) {
+          attempts -= 1;
+          console.warn(`Google Places subsequent page fetch failed (attempts remaining: ${attempts}). Error: ${error.message}`);
+          
+          if (error.statusCode === 401) {
+            attempts = 0; // Don't retry if it is an authorization issue
+          } else if (attempts > 0) {
+            console.log('Waiting 2000ms before retrying...');
+            await sleep(2000);
+          }
+        }
+      }
+
+      if (!success || !pageData) {
+        console.warn('Could not retrieve subsequent page results. Returning accumulated results.');
+        break;
+      }
+    }
 
     textResults.push(...(pageData.results || []));
     nextPageToken = pageData.next_page_token;

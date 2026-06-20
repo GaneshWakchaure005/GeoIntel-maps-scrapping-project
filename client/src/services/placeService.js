@@ -69,7 +69,68 @@ const placeService = {
     if (filters.city) params.append('city', filters.city);
     if (filters.ids) params.append('ids', filters.ids);
     return `${API_BASE_URL}/export/excel?${params.toString()}`;
+  },
+
+  /**
+   * Export places as CSV blob
+   */
+  exportCsv: async (filters = {}) => {
+    const response = await api.get('/export/csv', {
+      params: filters,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  /**
+   * Export places as Excel blob
+   */
+  exportExcel: async (filters = {}) => {
+    const response = await api.get('/export/excel', {
+      params: filters,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  /**
+   * Get search results for a specific history ID
+   */
+  getHistoryResults: async (id) => {
+    const response = await api.get(`/history/${id}/results`);
+    return response.data;
+  },
+
+  /**
+   * Clear all search history logs for the user
+   */
+  clearHistory: async () => {
+    const response = await api.delete('/history');
+    return response.data;
+  },
+
+  /**
+   * Export places of a specific history job as CSV
+   */
+  exportCsvByHistory: async (historyId) => {
+    const response = await api.get('/export/csv', {
+      params: { historyId },
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  /**
+   * Export places of a specific history job as Excel
+   */
+  exportExcelByHistory: async (historyId) => {
+    const response = await api.get('/export/excel', {
+      params: { historyId },
+      responseType: 'blob'
+    });
+    return response.data;
   }
 };
 
 export default placeService;
+

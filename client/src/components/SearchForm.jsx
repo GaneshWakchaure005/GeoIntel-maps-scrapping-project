@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Search, MapPin, Compass } from 'lucide-react';
-import { DEFAULT_RADIUS } from '../utils/constants';
+import { useState } from 'react';
+import { Search, MapPin, Compass, Sliders } from 'lucide-react';
+import { DEFAULT_MAX_RESULTS } from '../utils/constants';
 
 const SearchForm = ({ onSearch, loading, initialValues = {} }) => {
   const [keyword, setKeyword] = useState(initialValues.keyword || '');
   const [location, setLocation] = useState(initialValues.location || initialValues.city || '');
-  const [radius, setRadius] = useState(initialValues.radius || DEFAULT_RADIUS);
+  const [radius, setRadius] = useState(initialValues.radius !== undefined ? initialValues.radius : '');
+  const [maxResults, setMaxResults] = useState(initialValues.maxResults !== undefined ? initialValues.maxResults : DEFAULT_MAX_RESULTS);
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
@@ -25,15 +26,21 @@ const SearchForm = ({ onSearch, loading, initialValues = {} }) => {
       return;
     }
 
-    if (radius <= 0) {
+    if (radius !== '' && (isNaN(Number(radius)) || Number(radius) <= 0)) {
       setError('Radius must be a positive number.');
+      return;
+    }
+
+    if (maxResults !== '' && (isNaN(Number(maxResults)) || Number(maxResults) <= 0 || Number(maxResults) > 60)) {
+      setError('Max limit must be a positive number between 1 and 60.');
       return;
     }
 
     onSearch({
       keyword: cleanKeyword,
       location: cleanLocation,
-      radius: Number(radius)
+      radius: radius !== '' ? Number(radius) : undefined,
+      maxResults: maxResults !== '' ? Number(maxResults) : undefined
     });
   };
 
@@ -42,7 +49,7 @@ const SearchForm = ({ onSearch, loading, initialValues = {} }) => {
       onSubmit={handleSubmit} 
       className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm transition-all"
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Keyword Field */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
@@ -86,7 +93,7 @@ const SearchForm = ({ onSearch, loading, initialValues = {} }) => {
         {/* Radius Field */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-            Search Radius (meters)
+            Search Radius (meters) <span className="text-slate-400 dark:text-slate-500 lowercase font-normal">(optional)</span>
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
@@ -94,13 +101,35 @@ const SearchForm = ({ onSearch, loading, initialValues = {} }) => {
             </div>
             <input
               type="number"
-              placeholder="e.g. 5000, 10000"
+              placeholder="e.g. 5000, 10000 (default: none)"
               value={radius}
               onChange={(e) => setRadius(e.target.value)}
               disabled={loading}
               min="500"
               max="50000"
               step="500"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 text-slate-950 dark:text-slate-50 border border-slate-200 dark:border-slate-800 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 rounded-xl outline-none transition text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Max Limit Field */}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            Max Results Limit
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+              <Sliders className="w-4 h-4" />
+            </div>
+            <input
+              type="number"
+              placeholder="e.g. 20, 40 (max 60)"
+              value={maxResults}
+              onChange={(e) => setMaxResults(e.target.value)}
+              disabled={loading}
+              min="1"
+              max="60"
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 text-slate-950 dark:text-slate-50 border border-slate-200 dark:border-slate-800 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 rounded-xl outline-none transition text-sm"
             />
           </div>

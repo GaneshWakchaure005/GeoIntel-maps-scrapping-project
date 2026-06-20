@@ -12,7 +12,7 @@ export function calculateLeadScore(place) {
 }
 
 export function getLeadTier(score) {
-  if (score >= 80) return 'hot';
-  if (score >= 60) return 'warm';
-  return 'cold';
+  if (score >= 80) return 'high';
+  if (score >= 60) return 'medium';
+  return 'low';
 }

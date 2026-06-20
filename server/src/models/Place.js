@@ -22,7 +22,7 @@ const placeSchema = new mongoose.Schema(
     searchKeyword: { type: String, default: null },
     searchLocation: { type: String, default: null },
     leadScore: { type: Number, min: 0, max: 100, default: 0 },
-    leadTier: { type: String, enum: ["hot", "warm", "cold"], default: "cold" },
+    leadTier: { type: String, enum: ["high", "medium", "low"], default: "low" },
     rawTypes: { type: [String], default: [] },
     source: { type: String, default: "google_places" },
   },

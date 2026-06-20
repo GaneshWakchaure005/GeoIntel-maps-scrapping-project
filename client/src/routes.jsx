@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import SearchHistory from './pages/SearchHistory';
+import HistoryResults from './pages/HistoryResults';
 import NotFound from './pages/NotFound';
 import LoadingSpinner from './components/LoadingSpinner';
 
@@ -47,6 +48,7 @@ const AppRoutes = () => {
         <Route element={<ProtectedLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="history" element={<SearchHistory />} />
+          <Route path="history/:id" element={<HistoryResults />} />
         </Route>
 
         {/* 404 Route */}

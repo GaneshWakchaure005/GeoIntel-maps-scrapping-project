@@ -29,12 +29,14 @@ const Dashboard = () => {
     const keyword = params.get('keyword');
     const location = params.get('location') || params.get('city');
     const radius = params.get('radius');
+    const maxResults = params.get('maxResults');
 
     if (keyword && location) {
       return {
         keyword,
         location,
-        radius: radius ? Number(radius) : 10000
+        radius: radius ? Number(radius) : undefined,
+        maxResults: maxResults ? Number(maxResults) : undefined
       };
     }
     return null;
@@ -46,7 +48,12 @@ const Dashboard = () => {
   // Run search once on mount if filters are parsed from URL query
   useEffect(() => {
     if (currentFilters) {
-      search(currentFilters.keyword, currentFilters.location, currentFilters.radius);
+      search(
+        currentFilters.keyword, 
+        currentFilters.location, 
+        currentFilters.radius, 
+        currentFilters.maxResults
+      );
       setSearchParams({}, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,7 +63,7 @@ const Dashboard = () => {
   const handleSearchSubmit = async (formData) => {
     setSuccessMsg('');
     setCurrentFilters(formData);
-    await search(formData.keyword, formData.location, formData.radius);
+    await search(formData.keyword, formData.location, formData.radius, formData.maxResults);
   };
 
   const handleDelete = async (id) => {

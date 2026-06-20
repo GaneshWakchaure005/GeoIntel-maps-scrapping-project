@@ -25,7 +25,7 @@ const searchResultSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    isNew: {
+    isNewlyAdded: {
       type: Boolean,
       default: false,
     },

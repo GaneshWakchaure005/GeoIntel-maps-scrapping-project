@@ -42,3 +42,16 @@ export const getHistoryResults = asyncHandler(async (req, res) => {
     },
   });
 });
+
+export const clearHistory = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  await Promise.all([
+    SearchHistory.deleteMany({ user: userId }),
+    SearchResult.deleteMany({ user: userId }),
+  ]);
+
+  res.json({
+    success: true,
+    message: "Search history cleared successfully.",
+  });
+});

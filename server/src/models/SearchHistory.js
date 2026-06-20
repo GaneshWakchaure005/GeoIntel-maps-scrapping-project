@@ -10,7 +10,7 @@ const searchHistorySchema = new mongoose.Schema(
     },
     keyword: { type: String, required: true, trim: true },
     location: { type: String, required: true, trim: true },
-    radius: { type: Number, default: 10000 },
+    radius: { type: Number },
     status: {
       type: String,
       enum: ["pending", "processing", "done", "failed"],

@@ -13,7 +13,12 @@ const Home = () => {
     const params = new URLSearchParams();
     params.append('keyword', formData.keyword);
     params.append('location', formData.location);
-    params.append('radius', formData.radius);
+    if (formData.radius !== undefined && formData.radius !== null && formData.radius !== '') {
+      params.append('radius', formData.radius);
+    }
+    if (formData.maxResults !== undefined && formData.maxResults !== null && formData.maxResults !== '') {
+      params.append('maxResults', formData.maxResults);
+    }
 
     if (isAuthenticated) {
       navigate(`/dashboard?${params.toString()}`);
@@ -33,7 +38,7 @@ const Home = () => {
     },
     {
       title: 'Lead Tier Assessment',
-      desc: 'Grades target business listings into cold, warm, or hot leads using customizable heuristic metrics.',
+      desc: 'Grades target business listings into low, medium, or high priority leads using customizable heuristic metrics.',
       icon: Layers,
       color: 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/20'
     },

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { Star, Globe, Phone, Clock, Trash2, ChevronUp, ExternalLink } from 'lucide-react';
 import { LEAD_TIER_COLORS } from '../utils/constants';
 
@@ -15,7 +15,7 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
 
   const getTierBadge = (tier) => {
     const baseStyle = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border';
-    const colorStyle = LEAD_TIER_COLORS[tier] || LEAD_TIER_COLORS.cold;
+    const colorStyle = LEAD_TIER_COLORS[tier] || LEAD_TIER_COLORS.low;
     return <span className={`${baseStyle} ${colorStyle}`}>{tier}</span>;
   };
 
@@ -39,7 +39,7 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
               const isHoursExpanded = expandedHours[place._id];
 
               return (
-                <React.Fragment key={place._id}>
+                <Fragment key={place._id}>
                   <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                     {/* Place Name and Address */}
                     <td className="py-4 px-6 max-w-xs">
@@ -163,7 +163,7 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
                       </td>
                     </tr>
                   )}
-                </React.Fragment>
+                </Fragment>
               );
             })}
           </tbody>

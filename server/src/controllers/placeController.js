@@ -47,7 +47,7 @@ const searchPlaces = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const keyword = String(req.body.keyword || "").trim();
   const location = String(req.body.location || req.body.city || "").trim();
-  const radius = parsePositiveNumber(req.body.radius, 10000);
+  const radius = req.body.radius ? parsePositiveNumber(req.body.radius, undefined) : undefined;
   const maxResults = parsePositiveNumber(req.body.maxResults, Number(process.env.GOOGLE_MAX_RESULTS || 40));
 
   if (!keyword || !location) {
@@ -102,7 +102,7 @@ const searchPlaces = asyncHandler(async (req, res) => {
                 searchHistory: history._id,
                 place: existingPlace._id,
                 googlePlaceId: cleanedPlace.placeId,
-                isNew: false,
+                isNewlyAdded: false,
                 duplicate: true,
                 duplicateReason: "placeId",
               },
@@ -129,7 +129,7 @@ const searchPlaces = asyncHandler(async (req, res) => {
                 searchHistory: history._id,
                 place: fuzzyDuplicate._id,
                 googlePlaceId: cleanedPlace.placeId,
-                isNew: false,
+                isNewlyAdded: false,
                 duplicate: true,
                 duplicateReason: "fuzzy",
               },
@@ -157,7 +157,7 @@ const searchPlaces = asyncHandler(async (req, res) => {
               searchHistory: history._id,
               place: createdPlace._id,
               googlePlaceId: createdPlace.placeId,
-              isNew: true,
+              isNewlyAdded: true,
               duplicate: false,
               duplicateReason: "none",
             },
