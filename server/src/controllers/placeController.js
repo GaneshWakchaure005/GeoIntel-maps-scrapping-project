@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const Place = require('../models/Place');
-const SearchHistory = require('../models/SearchHistory');
-const asyncHandler = require('../utils/asyncHandler');
-const { isFuzzyDuplicate } = require('./services/deduplication');
-const { searchGooglePlaces } = require('./services/googlePlaces');
-const { validateAndCleanPlace } = require('./services/validation');
+import Place from '../models/Place.js';
+import SearchHistory from '../models/SearchHistory.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import { isFuzzyDuplicate } from './services/deduplication.js';
+import { searchGooglePlaces } from './services/googlePlaces.js';
+import { validateAndCleanPlace } from './services/validation.js';
 
 function parsePositiveNumber(value, fallback) {
   const parsed = Number(value);

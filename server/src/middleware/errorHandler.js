@@ -1,10 +1,10 @@
-function notFoundHandler(req, res, next) {
+export function notFoundHandler(req, res, next) {
   const error = new Error(`Route not found: ${req.method} ${req.originalUrl}`);
   error.statusCode = 404;
   next(error);
 }
 
-function errorHandler(error, req, res, next) {
+export function errorHandler(error, req, res, next) {
   const statusCode = error.statusCode || 500;
 
   if (statusCode >= 500) {
@@ -17,8 +17,3 @@ function errorHandler(error, req, res, next) {
     details: error.details,
   });
 }
-
-module.exports = {
-  errorHandler,
-  notFoundHandler,
-};

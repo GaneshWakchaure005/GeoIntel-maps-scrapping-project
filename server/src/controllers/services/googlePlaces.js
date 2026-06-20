@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const TEXT_SEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
 const DETAILS_URL = 'https://maps.googleapis.com/maps/api/place/details/json';
@@ -75,7 +75,7 @@ async function getPlaceDetails(placeId) {
   return response.data.result || null;
 }
 
-async function searchGooglePlaces({ keyword, location, radius = 10000, maxResults }) {
+export async function searchGooglePlaces({ keyword, location, radius = 10000, maxResults }) {
   const maxPages = Number(process.env.GOOGLE_TEXT_SEARCH_MAX_PAGES || 3);
   const resultLimit = Math.min(Number(maxResults || process.env.GOOGLE_MAX_RESULTS || 40), 60);
   const textResults = [];
@@ -123,7 +123,3 @@ async function searchGooglePlaces({ keyword, location, radius = 10000, maxResult
     apiCalls,
   };
 }
-
-module.exports = {
-  searchGooglePlaces,
-};

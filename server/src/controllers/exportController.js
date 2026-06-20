@@ -1,5 +1,7 @@
 import Place from '../models/Place.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { Parser } from 'json2csv';
+import xlsx from 'xlsx';
 
 function buildExportQuery(query) {
   const filters = {};
@@ -38,8 +40,7 @@ function toRows(places) {
   }));
 }
 
-const exportCsv = asyncHandler(async (req, res) => {
-  const { Parser } = require('json2csv');
+export const exportCsv = asyncHandler(async (req, res) => {
   const places = await Place.find(buildExportQuery(req.query)).sort({ createdAt: -1 });
   const parser = new Parser();
   const csv = parser.parse(toRows(places));
@@ -49,8 +50,7 @@ const exportCsv = asyncHandler(async (req, res) => {
   res.send(csv);
 });
 
-const exportExcel = asyncHandler(async (req, res) => {
-  const xlsx = require('xlsx');
+export const exportExcel = asyncHandler(async (req, res) => {
   const places = await Place.find(buildExportQuery(req.query)).sort({ createdAt: -1 });
   const worksheet = xlsx.utils.json_to_sheet(toRows(places));
   const workbook = xlsx.utils.book_new();
@@ -61,8 +61,3 @@ const exportExcel = asyncHandler(async (req, res) => {
   res.attachment(`places-${Date.now()}.xlsx`);
   res.send(buffer);
 });
-
-module.exports = {
-  exportCsv,
-  exportExcel,
-};

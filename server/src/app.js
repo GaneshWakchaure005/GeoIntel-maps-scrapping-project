@@ -5,14 +5,14 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 
 import authRoutes from "./routes/authRoutes.js";
-import exportRoutes from "./src/routes/exportRoutes.js";
-import placeRoutes from "./src/routes/placeRoutes.js";
-import historyRoutes from "./src/routes/historyRoutes.js";
+import exportRoutes from "./routes/exportRoutes.js";
+import placeRoutes from "./routes/placeRoutes.js";
+import historyRoutes from "./routes/historyRoutes.js";
 
 import {
   errorHandler,
   notFoundHandler,
-} from "./src/middleware/errorHandler.js";
+} from "./middleware/errorHandler.js";
 
 const app = express();
 

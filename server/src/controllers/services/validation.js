@@ -1,4 +1,4 @@
-const { calculateLeadScore, getLeadTier } = require('./leadScoring');
+import { calculateLeadScore, getLeadTier } from './leadScoring.js';
 
 function isValidLat(lat) {
   return typeof lat === 'number' && lat >= -90 && lat <= 90;
@@ -37,7 +37,7 @@ function getCategory(rawPlace) {
   return null;
 }
 
-function validateAndCleanPlace(rawPlace, context = {}) {
+export function validateAndCleanPlace(rawPlace, context = {}) {
   const lat = rawPlace.geometry?.location?.lat;
   const lng = rawPlace.geometry?.location?.lng;
   const name = cleanString(rawPlace.name);
@@ -68,7 +68,3 @@ function validateAndCleanPlace(rawPlace, context = {}) {
 
   return cleaned;
 }
-
-module.exports = {
-  validateAndCleanPlace,
-};

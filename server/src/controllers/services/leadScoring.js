@@ -1,4 +1,4 @@
-function calculateLeadScore(place) {
+export function calculateLeadScore(place) {
   let score = 0;
 
   if (place.website) score += 30;
@@ -11,13 +11,8 @@ function calculateLeadScore(place) {
   return Math.min(score, 100);
 }
 
-function getLeadTier(score) {
+export function getLeadTier(score) {
   if (score >= 80) return 'hot';
   if (score >= 60) return 'warm';
   return 'cold';
 }
-
-module.exports = {
-  calculateLeadScore,
-  getLeadTier,
-};

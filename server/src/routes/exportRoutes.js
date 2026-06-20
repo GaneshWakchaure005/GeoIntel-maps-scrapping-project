@@ -1,9 +1,9 @@
-const express = require('express');
-const { exportCsv, exportExcel } = require('../controllers/exportController');
+import express from 'express';
+import { exportCsv, exportExcel } from '../controllers/exportController.js';
 
 const router = express.Router();
 
 router.get('/csv', exportCsv);
 router.get('/excel', exportExcel);
 
-module.exports = router;
+export default router;

@@ -60,14 +60,10 @@ function haversineKm(firstLat, firstLng, secondLat, secondLng) {
   return 2 * earthRadiusKm * Math.asin(Math.sqrt(a));
 }
 
-function isFuzzyDuplicate(newPlace, existingPlaces) {
+export function isFuzzyDuplicate(newPlace, existingPlaces) {
   return existingPlaces.some((existingPlace) => {
     const nameSimilarity = stringSimilarity(newPlace.name, existingPlace.name);
     const distance = haversineKm(newPlace.lat, newPlace.lng, existingPlace.lat, existingPlace.lng);
     return nameSimilarity >= 0.86 && distance <= 0.1;
   });
 }
-
-module.exports = {
-  isFuzzyDuplicate,
-};

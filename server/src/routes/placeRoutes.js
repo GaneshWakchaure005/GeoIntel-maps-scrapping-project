@@ -1,11 +1,11 @@
-const express = require('express');
-const {
+import express from 'express';
+import {
   deletePlace,
   getPlaceById,
   getPlaces,
   getSearchStatus,
   searchPlaces,
-} = require('../controllers/placeController');
+} from '../controllers/placeController.js';
 
 const router = express.Router();
 
@@ -15,4 +15,4 @@ router.get('/', getPlaces);
 router.get('/:id', getPlaceById);
 router.delete('/:id', deletePlace);
 
-module.exports = router;
+export default router;
