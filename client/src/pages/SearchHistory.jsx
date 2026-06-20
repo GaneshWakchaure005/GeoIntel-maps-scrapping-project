@@ -7,7 +7,7 @@ import placeService from '../services/placeService';
 import { History, Play, CheckCircle2, XCircle, Loader2, Trash2, Eye } from 'lucide-react';
 
 const SearchHistory = () => {
-  const { history, loading, error, fetchHistory, setError, setPlaces } = usePlaces();
+  const { loading, error, fetchHistory, setError, setPlaces } = usePlaces();
   const [localHistory, setLocalHistory] = useState([]);
   const [clearing, setClearing] = useState(false);
   const navigate = useNavigate();
