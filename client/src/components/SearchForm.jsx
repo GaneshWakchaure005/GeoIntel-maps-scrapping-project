@@ -31,8 +31,8 @@ const SearchForm = ({ onSearch, loading, initialValues = {} }) => {
       return;
     }
 
-    if (maxResults !== '' && (isNaN(Number(maxResults)) || Number(maxResults) <= 0 || Number(maxResults) > 60)) {
-      setError('Max limit must be a positive number between 1 and 60.');
+    if (maxResults !== '' && (isNaN(Number(maxResults)) || Number(maxResults) <= 0)) {
+      setError('Max results must be a positive number.');
       return;
     }
 
