@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react';
-import { Star, Globe, Phone, Clock, Trash2, ChevronUp, ExternalLink, Sparkles, Loader2, MapPin, Award } from 'lucide-react';
+import { Star, Globe, Phone, Clock, Trash2, ChevronUp, ExternalLink, Sparkles, Loader2, MapPin, Award, X } from 'lucide-react';
 import { LEAD_TIER_COLORS } from '../utils/constants';
 import placeService from '../services/placeService';
 
@@ -7,6 +7,7 @@ import placeService from '../services/placeService';
 const ResultsTable = ({ places = [], onDelete, deletingId }) => {
   const [expandedHours, setExpandedHours] = useState({});
   const [localSummaries, setLocalSummaries] = useState({});
+  const [hiddenSummaries, setHiddenSummaries] = useState({});
   const [summarizingId, setSummarizingId] = useState(null);
 
   const toggleHours = (id) => {
@@ -31,6 +32,10 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
         setLocalSummaries(prev => ({
           ...prev,
           [placeId]: res.summary
+        }));
+        setHiddenSummaries(prev => ({
+          ...prev,
+          [placeId]: false
         }));
       } else {
         alert(res.message || 'Failed to generate summary');
@@ -150,9 +155,16 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
     </div>
   );
 
-  const SummaryPanel = ({ summaryText, isMobile = false }) => (
-    <div className={`${isMobile ? 'mt-4' : ''} rounded-2xl border border-violet-200/80 dark:border-violet-900/50 bg-violet-50/70 dark:bg-violet-950/20 p-4 sm:p-5`}>
-      <div className="flex items-center gap-2 text-sm font-extrabold text-violet-700 dark:text-violet-300">
+  const SummaryPanel = ({ summaryText, onClose, isMobile = false }) => (
+    <div className={`${isMobile ? 'mt-4' : ''} relative rounded-2xl border border-violet-200/80 dark:border-violet-900/50 bg-violet-50/70 dark:bg-violet-950/20 p-4 sm:p-5`}>
+      <button 
+        onClick={onClose}
+        className="absolute top-4 right-4 p-1.5 text-violet-400 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/50 rounded-lg transition-colors cursor-pointer"
+        title="Hide Summary"
+      >
+        <X className="w-4 h-4" />
+      </button>
+      <div className="flex items-center gap-2 text-sm font-extrabold text-violet-700 dark:text-violet-300 pr-8">
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-violet-100 dark:border-violet-900/50">
           <Sparkles className="w-4 h-4" />
         </span>
@@ -171,7 +183,7 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
         {places.map((place) => {
           const hasHours = place.openingHours && place.openingHours.length > 0;
           const isHoursExpanded = expandedHours[place._id];
-          const summaryText = localSummaries[place._id] || place.aiSummary;
+          const summaryText = !hiddenSummaries[place._id] ? (localSummaries[place._id] || place.aiSummary) : null;
 
           return (
             <article
@@ -212,7 +224,7 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
                 <ActionButtons place={place} hasHours={hasHours} isHoursExpanded={isHoursExpanded} isMobile />
 
                 {hasHours && isHoursExpanded && <HoursPanel place={place} isMobile />}
-                {summaryText && <SummaryPanel summaryText={summaryText} isMobile />}
+                {summaryText && <SummaryPanel summaryText={summaryText} onClose={() => setHiddenSummaries(prev => ({ ...prev, [place._id]: true }))} isMobile />}
               </div>
             </article>
           );
@@ -237,7 +249,7 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
               {places.map((place) => {
                 const hasHours = place.openingHours && place.openingHours.length > 0;
                 const isHoursExpanded = expandedHours[place._id];
-                const summaryText = localSummaries[place._id] || place.aiSummary;
+                const summaryText = !hiddenSummaries[place._id] ? (localSummaries[place._id] || place.aiSummary) : null;
 
                 return (
                   <Fragment key={place._id}>
@@ -290,7 +302,7 @@ const ResultsTable = ({ places = [], onDelete, deletingId }) => {
                     {summaryText && (
                       <tr className="bg-white dark:bg-slate-900">
                         <td colSpan="6" className="py-5 px-6 border-b border-slate-200 dark:border-slate-800">
-                          <SummaryPanel summaryText={summaryText} />
+                          <SummaryPanel summaryText={summaryText} onClose={() => setHiddenSummaries(prev => ({ ...prev, [place._id]: true }))} />
                         </td>
                       </tr>
                     )}

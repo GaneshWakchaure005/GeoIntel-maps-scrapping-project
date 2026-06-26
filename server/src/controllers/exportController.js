@@ -49,6 +49,26 @@ function toRows(places) {
   }));
 }
 
+function getFilename(req, places, extension) {
+  let keyword = req.query.keyword;
+  let location = req.query.location || req.query.city;
+
+  if ((!keyword || !location) && places.length > 0) {
+    keyword = keyword || places[0].searchKeyword;
+    location = location || places[0].searchLocation;
+  }
+
+  if (keyword && location) {
+    return `${keyword} in ${location}.${extension}`;
+  } else if (keyword) {
+    return `${keyword}.${extension}`;
+  } else if (location) {
+    return `${location}.${extension}`;
+  } else {
+    return `places-export.${extension}`;
+  }
+}
+
 export const exportCsv = asyncHandler(async (req, res) => {
   const queryFilters = await buildExportQuery(req.query, req.user._id);
   const places = await Place.find(queryFilters).sort({ createdAt: -1 });
@@ -56,7 +76,7 @@ export const exportCsv = asyncHandler(async (req, res) => {
   const csv = parser.parse(toRows(places));
 
   res.header("Content-Type", "text/csv");
-  res.attachment(`places-${Date.now()}.csv`);
+  res.attachment(getFilename(req, places, 'csv'));
   res.send(csv);
 });
 
@@ -69,6 +89,6 @@ export const exportExcel = asyncHandler(async (req, res) => {
   const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
 
   res.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-  res.attachment(`places-${Date.now()}.xlsx`);
+  res.attachment(getFilename(req, places, 'xlsx'));
   res.send(buffer);
 });

@@ -30,6 +30,10 @@ function normalizeWebsite(website) {
 }
 
 function getCategory(rawPlace) {
+  if (rawPlace.primaryType) {
+    return rawPlace.primaryType.replace(/_/g, ' ');
+  }
+
   if (Array.isArray(rawPlace.types) && rawPlace.types.length > 0) {
     return rawPlace.types[0].replace(/_/g, ' ');
   }
@@ -38,26 +42,26 @@ function getCategory(rawPlace) {
 }
 
 export function validateAndCleanPlace(rawPlace, context = {}) {
-  const lat = rawPlace.geometry?.location?.lat;
-  const lng = rawPlace.geometry?.location?.lng;
-  const name = cleanString(rawPlace.name);
+  const lat = rawPlace.location?.latitude;
+  const lng = rawPlace.location?.longitude;
+  const name = cleanString(rawPlace.displayName?.text);
 
-  if (!rawPlace.place_id || !name) {
+  if (!rawPlace.id || !name) {
     return null;
   }
 
   const cleaned = {
-    placeId: rawPlace.place_id,
+    placeId: rawPlace.id,
     name,
     category: getCategory(rawPlace),
-    address: cleanString(rawPlace.formatted_address || rawPlace.vicinity),
+    address: cleanString(rawPlace.formattedAddress),
     lat: isValidLat(lat) ? lat : null,
     lng: isValidLng(lng) ? lng : null,
-    phone: normalizePhone(rawPlace.formatted_phone_number || rawPlace.international_phone_number),
-    website: normalizeWebsite(rawPlace.website),
+    phone: normalizePhone(rawPlace.nationalPhoneNumber || rawPlace.internationalPhoneNumber),
+    website: normalizeWebsite(rawPlace.websiteUri),
     rating: typeof rawPlace.rating === 'number' ? rawPlace.rating : null,
-    reviewCount: typeof rawPlace.user_ratings_total === 'number' ? rawPlace.user_ratings_total : 0,
-    openingHours: rawPlace.opening_hours?.weekday_text || [],
+    reviewCount: typeof rawPlace.userRatingCount === 'number' ? rawPlace.userRatingCount : 0,
+    openingHours: rawPlace.regularOpeningHours?.weekdayDescriptions || [],
     searchKeyword: context.keyword || null,
     searchLocation: context.location || null,
     rawTypes: Array.isArray(rawPlace.types) ? rawPlace.types : [],

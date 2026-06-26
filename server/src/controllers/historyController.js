@@ -34,6 +34,20 @@ export const getHistoryResults = asyncHandler(async (req, res) => {
     .populate("place")
     .sort({ createdAt: -1 });
 
+  const tierOrder = { high: 1, medium: 2, low: 3 };
+  results.sort((a, b) => {
+    const tierA = a.place?.leadTier || "low";
+    const tierB = b.place?.leadTier || "low";
+    
+    if (tierOrder[tierA] !== tierOrder[tierB]) {
+      return tierOrder[tierA] - tierOrder[tierB];
+    }
+    
+    const scoreA = a.place?.leadScore || 0;
+    const scoreB = b.place?.leadScore || 0;
+    return scoreB - scoreA;
+  });
+
   res.json({
     success: true,
     data: {

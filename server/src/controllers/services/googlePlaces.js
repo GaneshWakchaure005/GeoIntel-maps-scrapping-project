@@ -1,19 +1,21 @@
 import axios from 'axios';
 
-const TEXT_SEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
-const DETAILS_URL = 'https://maps.googleapis.com/maps/api/place/details/json';
-const DETAILS_FIELDS = [
-  'place_id',
-  'name',
-  'types',
-  'formatted_address',
-  'geometry',
-  'formatted_phone_number',
-  'international_phone_number',
-  'website',
-  'rating',
-  'user_ratings_total',
-  'opening_hours',
+const TEXT_SEARCH_URL = 'https://places.googleapis.com/v1/places:searchText';
+const FIELD_MASK = [
+  'places.id',
+  'places.displayName',
+  'places.formattedAddress',
+  'places.location',
+  'places.websiteUri',
+  'places.rating',
+  'places.userRatingCount',
+  'places.businessStatus',
+  'places.primaryType',
+  'places.types',
+  'places.internationalPhoneNumber',
+  'places.nationalPhoneNumber',
+  'places.regularOpeningHours',
+  'nextPageToken',
 ].join(',');
 
 function sleep(ms) {
@@ -32,49 +34,30 @@ function getApiKey() {
   return apiKey;
 }
 
-function assertGoogleStatus(data, operation) {
-  const okStatuses = ['OK', 'ZERO_RESULTS'];
-
-  if (!okStatuses.includes(data.status)) {
-    const error = new Error(`Google Places ${operation} failed with status ${data.status}`);
-    error.statusCode = data.status === 'REQUEST_DENIED' ? 401 : 502;
-    error.details = data.error_message;
-    throw error;
-  }
-}
-
-async function textSearchPage({ keyword, location, radius, pageToken }) {
-  const params = {
-    key: getApiKey(),
+async function searchTextPage({ keyword, location, radius, pageToken }) {
+  const data = {
+    textQuery: `${keyword} in ${location}`
   };
 
   if (pageToken) {
-    params.pagetoken = pageToken;
-  } else {
-    params.query = `${keyword} in ${location}`;
-    if (radius) {
-      params.radius = radius;
-    }
+    data.pageToken = pageToken;
   }
 
-  const response = await axios.get(TEXT_SEARCH_URL, { params, timeout: 15000 });
-  assertGoogleStatus(response.data, 'Text Search');
+  const headers = {
+    'X-Goog-Api-Key': getApiKey(),
+    'X-Goog-FieldMask': FIELD_MASK,
+    'Content-Type': 'application/json',
+  };
 
-  return response.data;
-}
-
-async function getPlaceDetails(placeId) {
-  const response = await axios.get(DETAILS_URL, {
-    params: {
-      key: getApiKey(),
-      place_id: placeId,
-      fields: DETAILS_FIELDS,
-    },
-    timeout: 15000,
-  });
-
-  assertGoogleStatus(response.data, 'Details');
-  return response.data.result || null;
+  try {
+    const response = await axios.post(TEXT_SEARCH_URL, data, { headers, timeout: 15000 });
+    return response.data;
+  } catch (error) {
+    const err = new Error(`Google Places Text Search failed: ${error.message}`);
+    err.statusCode = error.response?.status || 502;
+    err.details = error.response?.data || error.message;
+    throw err;
+  }
 }
 
 export async function searchGooglePlaces({ keyword, location, radius, maxResults }) {
@@ -89,7 +72,7 @@ export async function searchGooglePlaces({ keyword, location, radius, maxResults
 
     if (page === 0) {
       // First page is required, if it fails, throw
-      pageData = await textSearchPage({
+      pageData = await searchTextPage({
         keyword,
         location,
         radius,
@@ -99,7 +82,7 @@ export async function searchGooglePlaces({ keyword, location, radius, maxResults
     } else {
       // Subsequent pages: try with retry logic and graceful fallback
       if (nextPageToken) {
-        await sleep(2100);
+        await sleep(6000); // Sleep to allow next page to become valid (legacy API behavior, can keep it or reduce it. Keeping it as requested to "Preserve business logic")
       }
 
       let attempts = 3;
@@ -107,7 +90,7 @@ export async function searchGooglePlaces({ keyword, location, radius, maxResults
 
       while (attempts > 0 && !success) {
         try {
-          pageData = await textSearchPage({
+          pageData = await searchTextPage({
             keyword,
             location,
             radius,
@@ -118,12 +101,12 @@ export async function searchGooglePlaces({ keyword, location, radius, maxResults
         } catch (error) {
           attempts -= 1;
           console.warn(`Google Places subsequent page fetch failed (attempts remaining: ${attempts}). Error: ${error.message}`);
-          
-          if (error.statusCode === 401) {
+
+          if (error.statusCode === 401 || error.statusCode === 403) {
             attempts = 0; // Don't retry if it is an authorization issue
           } else if (attempts > 0) {
-            console.log('Waiting 2000ms before retrying...');
-            await sleep(2000);
+            console.log('Waiting 5000ms before retrying...');
+            await sleep(5000);
           }
         }
       }
@@ -134,31 +117,21 @@ export async function searchGooglePlaces({ keyword, location, radius, maxResults
       }
     }
 
-    textResults.push(...(pageData.results || []));
-    nextPageToken = pageData.next_page_token;
+    if (pageData.places) {
+      textResults.push(...pageData.places);
+    }
+    
+    nextPageToken = pageData.nextPageToken;
 
-    if (!nextPageToken || pageData.status === 'ZERO_RESULTS') {
+    if (!nextPageToken) {
       break;
     }
   }
 
   const limitedResults = textResults.slice(0, resultLimit);
-  const detailedResults = [];
-
-  for (const result of limitedResults) {
-    if (!result.place_id) continue;
-
-    try {
-      const details = await getPlaceDetails(result.place_id);
-      apiCalls += 1;
-      detailedResults.push({ ...result, ...details });
-    } catch (error) {
-      detailedResults.push(result);
-    }
-  }
 
   return {
-    places: detailedResults,
+    places: limitedResults,
     apiCalls,
   };
 }

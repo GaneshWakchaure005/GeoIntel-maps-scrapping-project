@@ -6,7 +6,6 @@ const SearchForm = ({ onSearch, loading, initialValues = {} }) => {
   const [keyword, setKeyword] = useState(initialValues.keyword || '');
   const [location, setLocation] = useState(initialValues.location || initialValues.city || '');
   const [radius, setRadius] = useState(initialValues.radius !== undefined ? initialValues.radius : '');
-  const [maxResults, setMaxResults] = useState(initialValues.maxResults !== undefined ? initialValues.maxResults : DEFAULT_MAX_RESULTS);
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
@@ -124,11 +123,12 @@ const SearchForm = ({ onSearch, loading, initialValues = {} }) => {
             </div>
             <input
               type="number"
-              placeholder="e.g. 20, 40, 500"
-              value={maxResults}
+              placeholder="max 60"
+              value={60}
               onChange={(e) => setMaxResults(e.target.value)}
               disabled={loading}
               min="1"
+              max="60"
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 text-slate-950 dark:text-slate-50 border border-slate-200 dark:border-slate-800 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 rounded-xl outline-none transition text-sm"
             />
           </div>
